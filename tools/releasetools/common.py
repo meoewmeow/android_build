@@ -1104,9 +1104,11 @@ class PartitionBuildProps(object):
     Return empty string if not found.
     """
     data = ''
-    partition_map = PartitionMapFromTargetFiles(input_file)
-    for prop_file in ['{}/etc/build.prop'.format(partition_map[name]),
-                      '{}/build.prop'.format(partition_map[name])]:
+    # input_file may be a ZipFile; PartitionMapFromTargetFiles expects an
+    # extracted dir and would crash on os.path.join with a ZipFile. Derive
+    # the paths from the partition name like AOSP does.
+    for prop_file in ['{}/etc/build.prop'.format(name.upper()),
+                      '{}/build.prop'.format(name.upper())]:
       try:
         data = ReadFromInputFile(input_file, prop_file)
         break
