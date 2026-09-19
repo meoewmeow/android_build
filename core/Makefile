@@ -7369,8 +7369,9 @@ $(SYMBOLS_ZIP): PRIVATE_SYMBOLS_MODULES_MAPPING_FILES := $(_symbols_zip_modules_
 $(SYMBOLS_ZIP): $(SOONG_ZIP) $(SYMBOLS_MAP) $(_symbols_zip_modules_symbols_files) $(_symbols_zip_modules_mapping_files)
 	@echo "Package symbols: $@"
 	$(hide) rm -rf $@ $@.symbols_list $@.mapping_list
-	# Find all installed files in the symbols directory and zip them into the symbols zip.
-	echo "$(PRIVATE_SYMBOLS_MODULES_FILES)" | tr " " "\n" | sort > $@.symbols_list
+	# soong_zip's -l entries are made relative to the tree root, since an
+	# absolute OUT_DIR would break filepath.Rel when no -C root is given.
+	echo "$(PRIVATE_SYMBOLS_MODULES_FILES)" | tr " " "\n" | sed -e "s|^$(CURDIR)/||" -e "/^$$/d" | sort > $@.symbols_list
 	$(hide) $(SOONG_ZIP) -d -o $@ -l $@.symbols_list
 	# Find all installed files in the symbols mapping directory and merge them into the symbols mapping textproto.
 	echo "$(PRIVATE_SYMBOLS_MODULES_MAPPING_FILES)" | tr " " "\n" | sort > $@.mapping_list
